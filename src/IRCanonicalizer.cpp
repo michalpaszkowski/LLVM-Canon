@@ -370,19 +370,25 @@ void IRCanonicalizer::reorderInstruction(
   if (!Visited.count(Used)) {
     Visited.insert(Used);
 
-    if (Used->getParent() == User->getParent()) {
-      // If Used and User share the same basic block move Used just before User.
-      Used->moveBefore(User);
-    } else {
-      // Otherwise move Used to the end of the basic block before the
-      // terminator.
-      Used->moveBefore(&Used->getParent()->back());
-    }
+    if (!isa<PHINode>(Used) && !Used->isEHPad()) {
+      // Do not move PHI nodes and 'pad' instructions to ensure they are first
+      // in a basic block. Also do not move their operands before them.
 
-    for (auto &OP : Used->operands()) {
-      if (auto *IOP = dyn_cast<Instruction>(OP)) {
-        // Walk up the def-use tree.
-        reorderInstruction(IOP, Used, Visited);
+      if (Used->getParent() == User->getParent()) {
+        // If Used and User share the same basic block move Used just before
+        // User.
+        Used->moveBefore(User);
+      } else {
+        // Otherwise move Used to the end of the basic block before the
+        // terminator.
+        Used->moveBefore(&Used->getParent()->back());
+      }
+
+      for (auto &OP : Used->operands()) {
+        if (auto *IOP = dyn_cast<Instruction>(OP)) {
+          // Walk up the def-use tree.
+          reorderInstruction(IOP, Used, Visited);
+        }
       }
     }
   }
