@@ -1,32 +1,52 @@
-# Prerequisites
-*.d
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+### Windows ###
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
-# Precompiled Headers
-*.gch
-*.pch
+### Linux ###
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+### Visual Studio Code ###
+/.vscode
 
-# Fortran module files
-*.mod
-*.smod
+### Visual Studio ###
+/.vs
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+### CLion ###
+/.idea
 
-# Executables
-*.exe
-*.out
-*.app
+### Building ###
+/build
