@@ -47,9 +47,12 @@ private:
   /// @{
   void nameFunctionArguments(Function &F);
   void nameBasicBlocks(Function &F);
-  void nameInstruction(Instruction *I);
+  void nameInstructions(SmallVector<Instruction *, 16> &Outputs);
+  void nameInstruction(Instruction *I,
+                       SmallPtrSet<const Instruction *, 32> &Visited);
   void nameAsInitialInstruction(Instruction *I);
-  void nameAsRegularInstruction(Instruction *I);
+  void nameAsRegularInstruction(Instruction *I,
+                                SmallPtrSet<const Instruction *, 32> &Visited);
   void foldInstructionName(Instruction *I);
   /// @}
 

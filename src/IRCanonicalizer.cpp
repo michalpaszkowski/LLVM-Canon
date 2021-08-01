@@ -25,8 +25,7 @@ bool IRCanonicalizer::runOnFunction(Function &F) {
   if (!PreserveOrder)
     reorderInstructions(Outputs);
 
-  for (auto &I : Outputs)
-    nameInstruction(I);
+  nameInstructions(Outputs);
 
   for (auto &I : instructions(F)) {
     if (!PreserveOrder) {
@@ -77,19 +76,41 @@ void IRCanonicalizer::nameBasicBlocks(Function &F) {
   }
 }
 
+/// Names instructions graphically.
+/// This method is a wrapper for recursive nameInstruction().
+///
+/// \see nameInstruction()
+/// \param Outputs Vector of pointers to output instructions collected top-down.
+void IRCanonicalizer::nameInstructions(
+    SmallVector<Instruction *, 16> &Outputs) {
+  // Keeping track of visited instructions while naming (even depth first) is
+  // necessary only to avoid infinite loops on PHI nodes.
+  SmallPtrSet<const Instruction *, 32> Visited;
+
+  for (auto &I : Outputs)
+    nameInstruction(I, Visited);
+}
+
 /// Names instructions graphically (recursive) in accordance with the
 /// def-use tree, starting from the initial instructions (defs), finishing at
 /// the output (top-most user) instructions (depth-first).
 ///
 /// \param I Instruction to be renamed.
-void IRCanonicalizer::nameInstruction(Instruction *I) {
-  // Determine the type of instruction to name.
-  if (isInitialInstruction(I)) {
-    // This is an initial instruction.
-    nameAsInitialInstruction(I);
-  } else {
-    // This must be a regular instruction.
-    nameAsRegularInstruction(I);
+void IRCanonicalizer::nameInstruction(
+    Instruction *I, SmallPtrSet<const Instruction *, 32> &Visited) {
+  // Keeping track of visited instructions while naming (even depth first) is
+  // necessary only to avoid infinite loops on PHI nodes.
+  if (!Visited.count(I)) {
+    Visited.insert(I);
+
+    // Determine the type of instruction to name.
+    if (isInitialInstruction(I)) {
+      // This is an initial instruction.
+      nameAsInitialInstruction(I);
+    } else {
+      // This must be a regular instruction.
+      nameAsRegularInstruction(I, Visited);
+    }
   }
 }
 
@@ -182,7 +203,8 @@ void IRCanonicalizer::nameAsInitialInstruction(Instruction *I) {
 ///
 /// \see getOutputFootprint()
 /// \param I Instruction to be renamed.
-void IRCanonicalizer::nameAsRegularInstruction(Instruction *I) {
+void IRCanonicalizer::nameAsRegularInstruction(
+    Instruction *I, SmallPtrSet<const Instruction *, 32> &Visited) {
   // Instruction operands for further sorting.
   SmallVector<SmallString<128>, 4> Operands;
 
@@ -195,7 +217,7 @@ void IRCanonicalizer::nameAsRegularInstruction(Instruction *I) {
   for (auto &OP : I->operands()) {
     if (auto *IOP = dyn_cast<Instruction>(OP)) {
       // Walk down the use-def chain.
-      nameInstruction(IOP);
+      nameInstruction(IOP, Visited);
       Operands.push_back(IOP->getName());
     } else if (isa<Value>(OP) && !isa<Function>(OP)) {
       // This must be an immediate value.
