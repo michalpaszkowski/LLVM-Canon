@@ -374,7 +374,8 @@ void IRCanonicalizer::reorderInstruction(
       // If Used and User share the same basic block move Used just before User.
       Used->moveBefore(User);
     } else {
-      // Otherwise move Used to the very end of its basic block.
+      // Otherwise move Used to the end of the basic block before the
+      // terminator.
       Used->moveBefore(&Used->getParent()->back());
     }
 
@@ -455,7 +456,7 @@ void IRCanonicalizer::reorderPHIIncomingValues(PHINode *PN) {
 }
 
 /// Returns a vector of output instructions. An output is an instruction which
-/// has side-effects or is ReturnInst. Uses isOutput().
+/// has side-effects or is a terminator instruction. Uses isOutput().
 ///
 /// \see isOutput()
 /// \param F Function to collect outputs from.
@@ -473,12 +474,13 @@ IRCanonicalizer::collectOutputInstructions(Function &F) {
 }
 
 /// Helper method checking whether the instruction may have side effects or is
-/// ReturnInst.
+/// a terminator instruction.
 ///
 /// \param I Considered instruction.
 bool IRCanonicalizer::isOutput(const Instruction *I) {
-  // Outputs are such instructions which may have side effects or is ReturnInst.
-  if (I->mayHaveSideEffects() || isa<ReturnInst>(I))
+  // Outputs are such instructions which may have side effects or are a
+  // terminator.
+  if (I->mayHaveSideEffects() || I->isTerminator())
     return true;
 
   return false;
