@@ -7,10 +7,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 
-using namespace llvm;
-
 /// IRCanonicalizer aims to transform LLVM IR into canonical form.
-class IRCanonicalizer : public FunctionPass {
+class IRCanonicalizer : public llvm::FunctionPass {
 public:
   static char ID;
 
@@ -25,7 +23,7 @@ public:
       : FunctionPass(ID), PreserveOrder(PreserveOrder), RenameAll(RenameAll),
         FoldPreoutputs(FoldPreoutputs), ReorderOperands(ReorderOperands) {}
 
-  bool runOnFunction(Function &F) override;
+  bool runOnFunction(llvm::Function &F) override;
 
 private:
   // Random constant for hashing, so the state isn't zero.
@@ -45,34 +43,34 @@ private:
 
   /// \name Naming.
   /// @{
-  void nameFunctionArguments(Function &F);
-  void nameBasicBlocks(Function &F);
-  void nameInstructions(SmallVector<Instruction *, 16> &Outputs);
-  void nameInstruction(Instruction *I,
-                       SmallPtrSet<const Instruction *, 32> &Visited);
-  void nameAsInitialInstruction(Instruction *I);
-  void nameAsRegularInstruction(Instruction *I,
-                                SmallPtrSet<const Instruction *, 32> &Visited);
-  void foldInstructionName(Instruction *I);
+  void nameFunctionArguments(llvm::Function &F);
+  void nameBasicBlocks(llvm::Function &F);
+  void nameInstructions(llvm::SmallVector<llvm::Instruction *, 16> &Outputs);
+  void nameInstruction(llvm::Instruction *I,
+                       llvm::SmallPtrSet<const llvm::Instruction *, 32> &Visited);
+  void nameAsInitialInstruction(llvm::Instruction *I);
+  void nameAsRegularInstruction(llvm::Instruction *I,
+                                llvm::SmallPtrSet<const llvm::Instruction *, 32> &Visited);
+  void foldInstructionName(llvm::Instruction *I);
   /// @}
 
   /// \name Reordering.
   /// @{
-  void reorderInstructions(SmallVector<Instruction *, 16> &Outputs);
-  void reorderInstruction(Instruction *Used, Instruction *User,
-                          SmallPtrSet<const Instruction *, 32> &Visited);
-  void reorderInstructionOperandsByNames(Instruction *I);
-  void reorderPHIIncomingValues(PHINode *PN);
+  void reorderInstructions(llvm::SmallVector<llvm::Instruction *, 16> &Outputs);
+  void reorderInstruction(llvm::Instruction *Used, llvm::Instruction *User,
+                          llvm::SmallPtrSet<const llvm::Instruction *, 32> &Visited);
+  void reorderInstructionOperandsByNames(llvm::Instruction *I);
+  void reorderPHIIncomingValues(llvm::PHINode *PN);
   /// @}
 
   /// \name Utility methods.
   /// @{
-  SmallVector<Instruction *, 16> collectOutputInstructions(Function &F);
-  bool isOutput(const Instruction *I);
-  bool isInitialInstruction(const Instruction *I);
-  bool hasOnlyImmediateOperands(const Instruction *I);
-  SetVector<int>
-  getOutputFootprint(Instruction *I,
-                     SmallPtrSet<const Instruction *, 32> &Visited);
+  llvm::SmallVector<llvm::Instruction *, 16> collectOutputInstructions(llvm::Function &F);
+  bool isOutput(const llvm::Instruction *I);
+  bool isInitialInstruction(const llvm::Instruction *I);
+  bool hasOnlyImmediateOperands(const llvm::Instruction *I);
+  llvm::SetVector<int>
+  getOutputFootprint(llvm::Instruction *I,
+                     llvm::SmallPtrSet<const llvm::Instruction *, 32> &Visited);
   /// @}
 };

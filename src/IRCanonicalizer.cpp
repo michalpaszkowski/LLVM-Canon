@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <vector>
 
+using namespace llvm;
+
 char IRCanonicalizer::ID = 0;
 
 /// Entry method to the IRCanonicalizer.
